@@ -1,0 +1,88 @@
+﻿# GitHub Sync Guide
+
+This file tells Claude Code how to handle GitHub operations (push, pull, clone) for this project.
+
+## 代理配置
+
+访问 GitHub 需要通过代理：
+```
+git config http.proxy http://127.0.0.1:7892
+git config https.proxy http://127.0.0.1:7892
+```
+
+安装 npm 依赖时也需要：
+```
+$env:HTTP_PROXY = "http://127.0.0.1:7892"
+$env:HTTPS_PROXY = "http://127.0.0.1:7892"
+```
+
+## 推送前必检清单
+
+每次推送前先运行这几项检测：
+
+1. `git rev-parse --is-inside-work-tree 2>$null` — 有没有 .git
+2. `git remote -v` — 有没有配远端
+3. `git status --porcelain` — 工作区干不干净
+4. `git ls-remote --symref origin HEAD` — 远端默认分支名
+
+## 推送场景
+
+### 全新项目（无 .git，无远端仓库）
+```
+git init
+git add .
+git commit -m "init: initial commit"
+git remote add origin https://github.com/<org>/<repo>.git
+git branch -M master
+git push -u origin master
+```
+
+### 已有代码，无 .git，远端已有仓库
+```
+git init
+git remote add origin https://github.com/<org>/<repo>.git
+git add .
+git commit -m "init: initial commit"
+git pull origin master --allow-unrelated-histories
+git push -u origin master
+```
+
+### 日常推送
+```
+git add .
+git commit -m "<描述>"
+git push
+```
+
+## 拉取场景
+
+### 全新克隆
+```
+git clone https://github.com/<org>/<repo>.git
+cd <repo>
+```
+
+### 已有 .git 但没配远端
+```
+git remote add origin https://github.com/<org>/<repo>.git
+git pull origin master
+```
+
+### 日常更新
+```
+git pull
+```
+
+## 冲突处理
+
+- 先试 `git merge --no-edit` 自动合并
+- 如果失败，手动解决后用 `git add` 标记
+- 解决不了用 `git merge --abort` 回退
+- 本地有未提交改动时，先 `git stash` 再 `git pull`
+
+## 分支说明
+
+master 和 main 只是默认名不同，功能一样。检测远端分支：
+```
+git ls-remote --symref origin HEAD
+```
