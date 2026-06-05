@@ -1,0 +1,4 @@
+interface:
+  display_name: "GitHub Sync"
+  short_description: "Push, pull, clone GitHub repos with proxy"
+  default_prompt: "I need to push this project to GitHub"
